@@ -123,6 +123,27 @@ and collaborative interactions. These interactions go beyond a typical tool
 invocation. A2A focuses on agents partnering on tasks, whereas MCP focuses on
 agents using capabilities.
 
+## Authorization Expectations
+
+Both support OAuth 2.0, and both make it optional: MCP's authorization specification is optional and written for HTTP transports, and A2A also accepts API key, HTTP, mutual TLS, and OpenID Connect schemes. They differ in how a client learns which credential to present.
+
+MCP is interrogative. The client fetches the server's Protected Resource Metadata (PRM, [RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728)) from a `401` challenge or the well-known URI, reads the authorization server from it, fetches its metadata ([RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414) or OpenID Connect Discovery), and requests a token with a `resource` parameter naming the MCP server ([RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707)). MCP's schema declares no OAuth flows.
+
+A2A is declarative. The client reads the Agent Card first: `securitySchemes` lists accepted schemes and `securityRequirements` says which combinations satisfy the agent. For an OAuth 2.0 scheme, `flows` names the grant type and endpoints before any request is sent, so discovery takes fewer round trips and needs no HTTP challenge header.
+
+The two meet at the authorization server. `oauth2MetadataUrl` (RFC 8414) and `openIdConnectUrl` (OpenID Connect Discovery) lead to the same authorization server metadata an MCP client reaches through PRM. MCP's [Enterprise-Managed Authorization](https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/stable/enterprise-managed-authorization.mdx) assertion grant is reached through the authorization server in PRM, not a declared flow. `oauth2MetadataUrl` and `pkceRequired` are defined in `specification/a2a.proto` ([Protocol Definition](../definitions.md)) only; the specification does not yet describe how a client uses `oauth2MetadataUrl`.
+
+| Topic | MCP | A2A |
+|---|---|---|
+| Where the client learns the authorization server | PRM, from a `401` challenge or the well-known URI | `oauth2MetadataUrl` or `openIdConnectUrl` in the Agent Card |
+| Where grant types are declared | Authorization server metadata only | `flows` in the Agent Card, plus authorization server metadata when linked |
+| Token audience | `resource` parameter on every authorization and token request | Not specified |
+| PKCE | Required for all clients | `pkceRequired` on the authorization code flow |
+| Client registration | Client ID Metadata Documents (CIMD), with Dynamic Client Registration kept for compatibility | Not specified |
+| Additional authorization during a task | Scope challenges (`insufficient_scope`) and URL-mode elicitation | `TASK_STATE_AUTH_REQUIRED`, with semantics left to the implementation, credential issuer, or an extension |
+
+Normative A2A requirements are in the specification's [Authentication and Authorization](../specification.md#7-authentication-and-authorization) section; A2A's own guidance, including out-of-band credential acquisition, is under [Authentication](enterprise-ready.md#authentication) and [Authorization](enterprise-ready.md#authorization) in Enterprise-Ready Features. This page covers only the MCP comparison.
+
 ## Representing A2A Agents as MCP Resources
 
 An A2A Server (a remote agent) could expose some of its skills as MCP-compatible resources, especially if those skills are well-defined and can be invoked in a more tool-like, stateless manner. In such a case, another agent might "discover" this A2A agent's specific skill through an MCP-style tool description (perhaps derived from its Agent Card).
