@@ -134,7 +134,7 @@ A2A is declarative. The client reads the Agent Card first: `securitySchemes` lis
 The two meet at the authorization server. `oauth2MetadataUrl` (RFC 8414) and `openIdConnectUrl` (OpenID Connect Discovery) lead to the same authorization server metadata an MCP client reaches through PRM. MCP's [Enterprise-Managed Authorization](https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/stable/enterprise-managed-authorization.mdx) assertion grant is reached through the authorization server in PRM, not a declared flow. `oauth2MetadataUrl` and `pkceRequired` are defined in `specification/a2a.proto` ([Protocol Definition](../definitions.md)) only; the specification does not yet describe how a client uses `oauth2MetadataUrl`.
 
 | Topic | MCP | A2A |
-|---|---|---|
+| --- | --- | --- |
 | Where the client learns the authorization server | PRM, from a `401` challenge or the well-known URI | `oauth2MetadataUrl` or `openIdConnectUrl` in the Agent Card |
 | Where grant types are declared | Authorization server metadata only | `flows` in the Agent Card, plus authorization server metadata when linked |
 | Token audience | `resource` parameter on every authorization and token request | Not specified |
